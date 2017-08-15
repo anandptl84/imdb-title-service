@@ -19,7 +19,7 @@ import com.netflix.exercise.query.model.Title;
 import com.netflix.exercise.service.TitleService;
 
 @RestController
-public class MovieController {
+public class TitlesController {
 
 	@Autowired
 	private JobLauncher jobLauncher;
