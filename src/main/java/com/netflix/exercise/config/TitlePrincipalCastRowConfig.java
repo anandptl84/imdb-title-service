@@ -14,16 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.netflix.exercise.batch.TitleCrewDirectorWriter;
-import com.netflix.exercise.batch.TitleCrewWritersWriter;
 import com.netflix.exercise.batch.TitlePrincipalCastWriter;
-import com.netflix.exercise.batch.mapper.TitleEpisodeFieldSetMapper;
 import com.netflix.exercise.batch.mapper.TitlePrincipalCastRowFieldSetMapper;
-import com.netflix.exercise.batch.model.TitleCrewRow;
-import com.netflix.exercise.batch.model.TitleEpisodeRow;
 import com.netflix.exercise.batch.model.TitlePrincipalCastRow;
 
 import jersey.repackaged.com.google.common.collect.Lists;
@@ -33,28 +28,26 @@ public class TitlePrincipalCastRowConfig {
 
 	@Autowired
 	public DataSource dataSource;
-	
+
 	@Autowired
 	public TitlePrincipalCastRowFieldSetMapper titlePrincipleCastRowFieldSetMapper;
 
-	
-	@Value("${title.basic.file.path}")
-	public String titleCrewFilePath;
-
+	@Value("${title.principal.cast.path}")
+	public String titlePrincipalCastPath;
 
 	@Bean
 	public ItemReader<TitlePrincipalCastRow> titlePrincipleCastRowReader() {
-		FlatFileItemReader<TitlePrincipalCastRow> csvFileReader = new FlatFileItemReader<>();
-		csvFileReader.setResource(new FileSystemResource("/Users/anand/exercise/title.principals.tsv"));
+		final FlatFileItemReader<TitlePrincipalCastRow> csvFileReader = new FlatFileItemReader<>();
+		csvFileReader.setResource(new ClassPathResource(titlePrincipalCastPath));
 		csvFileReader.setLinesToSkip(1);
 		csvFileReader.setLineMapper(titlePrincipleCastMapper());
 		return csvFileReader;
 
 	}
-	
+
 	@Bean
-	public LineMapper<TitlePrincipalCastRow> titlePrincipleCastMapper(){
-		DefaultLineMapper<TitlePrincipalCastRow> titleCrewRowMapper = new DefaultLineMapper<>();
+	public LineMapper<TitlePrincipalCastRow> titlePrincipleCastMapper() {
+		final DefaultLineMapper<TitlePrincipalCastRow> titleCrewRowMapper = new DefaultLineMapper<>();
 		titleCrewRowMapper.setLineTokenizer(titlePrincipalCastLineTokenizer());
 		titleCrewRowMapper.setFieldSetMapper(titlePrincipleCastRowFieldSetMapper);
 		return titleCrewRowMapper;
@@ -62,29 +55,27 @@ public class TitlePrincipalCastRowConfig {
 
 	@Bean
 	public LineTokenizer titlePrincipalCastLineTokenizer() {
-		DelimitedLineTokenizer titlePrincipalCastLineTokenizer = new DelimitedLineTokenizer();
+		final DelimitedLineTokenizer titlePrincipalCastLineTokenizer = new DelimitedLineTokenizer();
 		titlePrincipalCastLineTokenizer.setDelimiter(DelimitedLineTokenizer.DELIMITER_TAB);
-		titlePrincipalCastLineTokenizer.setNames(new String[] { "titleId", "principalCasts"});
+		titlePrincipalCastLineTokenizer.setNames(new String[] { "titleId", "principalCasts" });
 		return titlePrincipalCastLineTokenizer;
 	}
-	
 
-	
 	@SuppressWarnings("unchecked")
 	@Bean
 	public ItemWriter<TitlePrincipalCastRow> compositeTitlePrincipalCastRowWriter() {
-		CompositeItemWriter<TitlePrincipalCastRow> compositeWriter = new CompositeItemWriter<>();
+		final CompositeItemWriter<TitlePrincipalCastRow> compositeWriter = new CompositeItemWriter<>();
 		compositeWriter.setDelegates(Lists.newArrayList(titlePrincipalCastRowWriter()));
 		return compositeWriter;
 	}
-	
+
 	@Bean
-	public  ItemWriter<TitlePrincipalCastRow> titlePrincipalCastRowWriter() {
+	public ItemWriter<TitlePrincipalCastRow> titlePrincipalCastRowWriter() {
 		return new TitlePrincipalCastWriter(jdbcTemplate());
-		
+
 	}
-	
-	@Bean 
+
+	@Bean
 	public JdbcTemplate jdbcTemplate() {
 		return new JdbcTemplate(dataSource);
 	}

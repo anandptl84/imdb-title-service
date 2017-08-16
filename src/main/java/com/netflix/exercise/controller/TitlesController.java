@@ -38,7 +38,7 @@ public class TitlesController {
 				.toJobParameters();
 		final JobExecution jobExecution = jobLauncher.run(titleBasicInsertJob, jobParameters);
 
-		return String.format("Job finished with status: %s", jobExecution.getExitStatus());
+		return String.format("Job finished with status: %s", jobExecution.getExitStatus().getExitCode());
 	}
 
 	@RequestMapping("{id}")

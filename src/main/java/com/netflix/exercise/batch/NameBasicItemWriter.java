@@ -13,27 +13,26 @@ import org.springframework.stereotype.Component;
 import com.netflix.exercise.batch.model.NameBasicRow;
 
 @Component
-public class NameBasicItemWriter implements ItemWriter<NameBasicRow>{
-	private static final String INSERT_NAME_BASIC = "insert into name_basic (name_id, primary_name, birthYear, deathYear) values (?,?,?,?)";
-	private final JdbcTemplate jdbcTemplate; 
-	
-	
+public class NameBasicItemWriter implements ItemWriter<NameBasicRow> {
+	private static final String INSERT_NAME_BASIC = "insert into name_basic (name_id, primary_name, birth_year, death_year) values (?,?,?,?)";
+	private final JdbcTemplate jdbcTemplate;
+
 	public NameBasicItemWriter(@Autowired JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
-	
+
 	@Override
 	public void write(List<? extends NameBasicRow> items) throws Exception {
 		jdbcTemplate.batchUpdate(INSERT_NAME_BASIC, new BatchPreparedStatementSetter() {
 
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				NameBasicRow nameBasic = items.get(i);
+				final NameBasicRow nameBasic = items.get(i);
 				ps.setString(1, nameBasic.getNameId());
 				ps.setString(2, nameBasic.getPrimaryName());
-				
+
 				if (nameBasic.getBirthYear() == null) {
-					ps.setNull(3,java.sql.Types.INTEGER);
+					ps.setNull(3, java.sql.Types.INTEGER);
 				} else {
 					ps.setInt(3, nameBasic.getBirthYear());
 				}
@@ -49,7 +48,7 @@ public class NameBasicItemWriter implements ItemWriter<NameBasicRow>{
 				return items.size();
 			}
 
-		  });
-		
+		});
+
 	}
 }

@@ -14,12 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.netflix.exercise.batch.NameBasicItemWriter;
 import com.netflix.exercise.batch.NameKnownTitleWriter;
-
 import com.netflix.exercise.batch.mapper.NameBasicRowFieldSetMapper;
 import com.netflix.exercise.batch.model.NameBasicRow;
 
@@ -34,13 +33,13 @@ public class NameBasicConfig {
 	@Autowired
 	private NameBasicRowFieldSetMapper nameBasicRowFieldSetMapper;
 
-	@Value("${title.basic.file.path}")
-	public String titleCrewFilePath;
+	@Value("${name.basics.path}")
+	public String nameBasicsPath;
 
 	@Bean
 	public ItemReader<NameBasicRow> nameBasicRowReader() {
-		FlatFileItemReader<NameBasicRow> csvFileReader = new FlatFileItemReader<>();
-		csvFileReader.setResource(new FileSystemResource("/Users/anand/exercise/name.basics.tsv"));
+		final FlatFileItemReader<NameBasicRow> csvFileReader = new FlatFileItemReader<>();
+		csvFileReader.setResource(new ClassPathResource(nameBasicsPath));
 		csvFileReader.setLinesToSkip(1);
 		csvFileReader.setLineMapper(nameBasicRowMapper());
 		return csvFileReader;
@@ -49,7 +48,7 @@ public class NameBasicConfig {
 
 	@Bean
 	public LineMapper<NameBasicRow> nameBasicRowMapper() {
-		DefaultLineMapper<NameBasicRow> nameBasicRowMapper = new DefaultLineMapper<>();
+		final DefaultLineMapper<NameBasicRow> nameBasicRowMapper = new DefaultLineMapper<>();
 		nameBasicRowMapper.setLineTokenizer(nameBasicRowLineTokenizer());
 		nameBasicRowMapper.setFieldSetMapper(nameBasicRowFieldSetMapper);
 		return nameBasicRowMapper;
@@ -57,16 +56,17 @@ public class NameBasicConfig {
 
 	@Bean
 	public LineTokenizer nameBasicRowLineTokenizer() {
-		DelimitedLineTokenizer nameBasicRowTokenizer = new DelimitedLineTokenizer();
+		final DelimitedLineTokenizer nameBasicRowTokenizer = new DelimitedLineTokenizer();
 		nameBasicRowTokenizer.setDelimiter(DelimitedLineTokenizer.DELIMITER_TAB);
-		nameBasicRowTokenizer.setNames(new String[] { "nameId", "primaryName", "birthYear", "deathYear", "primaryProfession", "knownForTitles" });
+		nameBasicRowTokenizer.setNames(new String[] { "nameId", "primaryName", "birthYear", "deathYear",
+				"primaryProfession", "knownForTitles" });
 		return nameBasicRowTokenizer;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Bean
 	public ItemWriter<NameBasicRow> compositeNameBasicWriter() {
-		CompositeItemWriter<NameBasicRow> compositeWriter = new CompositeItemWriter<>();
+		final CompositeItemWriter<NameBasicRow> compositeWriter = new CompositeItemWriter<>();
 		compositeWriter.setDelegates(Lists.newArrayList(nameBasicRowWriter(), nameKnownTitleWriter()));
 		return compositeWriter;
 	}
@@ -75,14 +75,13 @@ public class NameBasicConfig {
 	public ItemWriter<NameBasicRow> nameBasicRowWriter() {
 		return new NameBasicItemWriter(jdbcTemplate());
 	}
-	
+
 	@Bean
 	public ItemWriter<NameBasicRow> nameKnownTitleWriter() {
 		return new NameKnownTitleWriter(jdbcTemplate());
 	}
 
-
-	@Bean 
+	@Bean
 	public JdbcTemplate jdbcTemplate() {
 		return new JdbcTemplate(dataSource);
 	}

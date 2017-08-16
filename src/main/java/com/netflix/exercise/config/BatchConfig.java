@@ -18,14 +18,12 @@ import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 
 import com.netflix.exercise.batch.model.NameBasicRow;
 import com.netflix.exercise.batch.model.TitleBasicRow;
-import com.netflix.exercise.batch.model.TitleCrewRow;
-import com.netflix.exercise.batch.model.TitleEpisodeRow;
 import com.netflix.exercise.batch.model.TitlePrincipalCastRow;
 import com.netflix.exercise.batch.model.TitleRatingRow;
 
 @Configuration
-@Import({ TitleBasicRowConfig.class, TitleCrewConfig.class, TitleEpisodeConfig.class, TitlePrincipalCastRowConfig.class,
-		TitleRatingRowConfig.class, NameBasicConfig.class })
+@Import({ TitleBasicRowConfig.class, TitlePrincipalCastRowConfig.class, TitleRatingRowConfig.class,
+		NameBasicConfig.class })
 public class BatchConfig {
 
 	@Autowired
@@ -39,16 +37,16 @@ public class BatchConfig {
 	public ItemReader<TitleBasicRow> titleBasicReader;
 
 	@Autowired
-	@Qualifier("compositeTitleBasicRowWriter")
+	@Qualifier("basicItemWriter")
 	public ItemWriter<TitleBasicRow> compositeTitleBasicRowWriter;
 
-	@Autowired
-	@Qualifier("titleCrewReader")
-	public ItemReader<TitleCrewRow> titleCrewReader;
-
-	@Autowired
-	@Qualifier("compositeTitleCrewRowWriter")
-	public ItemWriter<TitleCrewRow> compositeTitleCrewRowWriter;
+	// @Autowired
+	// @Qualifier("titleCrewReader")
+	// public ItemReader<TitleCrewRow> titleCrewReader;
+	//
+	// @Autowired
+	// @Qualifier("compositeTitleCrewRowWriter")
+	// public ItemWriter<TitleCrewRow> compositeTitleCrewRowWriter;
 
 	@Autowired
 	@Qualifier("titlePrincipleCastRowReader")
@@ -57,14 +55,14 @@ public class BatchConfig {
 	@Autowired
 	@Qualifier("compositeTitlePrincipalCastRowWriter")
 	public ItemWriter<TitlePrincipalCastRow> compositeTitlePrincipalCastRowWriter;
-
-	@Autowired
-	@Qualifier("titleEpisodeReader")
-	public ItemReader<TitleEpisodeRow> titleEpisodeReader;
-
-	@Autowired
-	@Qualifier("compositeTitleEpisodeRowWriter")
-	public ItemWriter<TitleEpisodeRow> compositeTitleEpisodeRowWriter;
+	//
+	// @Autowired
+	// @Qualifier("titleEpisodeReader")
+	// public ItemReader<TitleEpisodeRow> titleEpisodeReader;
+	//
+	// @Autowired
+	// @Qualifier("compositeTitleEpisodeRowWriter")
+	// public ItemWriter<TitleEpisodeRow> compositeTitleEpisodeRowWriter;
 
 	@Autowired
 	@Qualifier("titleRatingRowReader")
@@ -85,8 +83,8 @@ public class BatchConfig {
 	@Bean
 	public Job titleBasicInsertJob() {
 		return jobBuilderFactory.get("titleBasicInsertJob").incrementer(new RunIdIncrementer())
-				.start(titleBasicInsert()).next(titleCrewInsert()).start(titleEpisodeInsert())
-				.start(titlePrincipleCastInsert()).start(titleRatingInsert()).start(nameBasicInsert()).build();
+				// .start(titleBasicInsert()).next(titlePrincipleCastInsert()).next(titleRatingInsert())
+				.start(nameBasicInsert()).build();
 	}
 
 	@Bean
@@ -96,20 +94,22 @@ public class BatchConfig {
 				.skipLimit(Integer.MAX_VALUE).build();
 
 	}
-
-	@Bean
-	public Step titleCrewInsert() {
-		return stepBuilderFactory.get("titleCrewInsert").<TitleCrewRow, TitleCrewRow>chunk(1).reader(titleCrewReader)
-				.writer(compositeTitleCrewRowWriter).faultTolerant().skip(Exception.class).skipLimit(Integer.MAX_VALUE)
-				.build();
-	}
-
-	@Bean
-	public Step titleEpisodeInsert() {
-		return stepBuilderFactory.get("titleEpisodeInsert").<TitleEpisodeRow, TitleEpisodeRow>chunk(1)
-				.reader(titleEpisodeReader).writer(compositeTitleEpisodeRowWriter).faultTolerant().skip(Exception.class)
-				.skipLimit(Integer.MAX_VALUE).build();
-	}
+	//
+	// @Bean
+	// public Step titleCrewInsert() {
+	// return stepBuilderFactory.get("titleCrewInsert").<TitleCrewRow,
+	// TitleCrewRow>chunk(1).reader(titleCrewReader)
+	// .writer(compositeTitleCrewRowWriter).faultTolerant().skip(Exception.class).skipLimit(Integer.MAX_VALUE)
+	// .build();
+	// }
+	//
+	// @Bean
+	// public Step titleEpisodeInsert() {
+	// return stepBuilderFactory.get("titleEpisodeInsert").<TitleEpisodeRow,
+	// TitleEpisodeRow>chunk(1)
+	// .reader(titleEpisodeReader).writer(compositeTitleEpisodeRowWriter).faultTolerant().skip(Exception.class)
+	// .skipLimit(Integer.MAX_VALUE).build();
+	// }
 
 	@Bean
 	public Step titlePrincipleCastInsert() {
