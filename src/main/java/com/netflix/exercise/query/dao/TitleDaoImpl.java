@@ -26,7 +26,7 @@ public class TitleDaoImpl implements TitleDao {
 	@Override
 	public Title getTitle(String titleId) {
 		final Session session = sessionFactory.getCurrentSession();
-		final Query query = session.createQuery("select t from Title t from Title t  where t.id = :titleId");
+		final Query query = session.createQuery("from Title t  where t.titleId = :titleId");
 		query.setParameter("titleId", titleId);
 		return (Title) query.uniqueResult();
 	}

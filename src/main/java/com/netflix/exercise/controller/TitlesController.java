@@ -12,6 +12,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,9 +42,10 @@ public class TitlesController {
 		return String.format("Job finished with status: %s", jobExecution.getExitStatus().getExitCode());
 	}
 
-	@RequestMapping("{id}")
-	public Title getMovie(@QueryParam("id") String id) {
-		return titleService.getTitle(id);
+	@RequestMapping("/titles/id/{id}")
+	public Title getMovie(@PathVariable("id") String id) {
+		final Title result = titleService.getTitle(id);
+		return result;
 	}
 
 	@RequestMapping("/titles")
