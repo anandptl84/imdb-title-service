@@ -32,7 +32,7 @@ public class TitlesController {
 	@Autowired
 	private TitleService titleService;
 
-	@RequestMapping("/titleBasicInsertJob")
+	@RequestMapping("/titles/refresh")
 	public String titleBasicInsertJob() throws Exception {
 
 		final JobParameters jobParameters = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
@@ -43,7 +43,7 @@ public class TitlesController {
 	}
 
 	@RequestMapping("/titles/id/{id}")
-	public Title getMovie(@PathVariable("id") String id) {
+	public Title getTitle(@PathVariable("id") String id) {
 		final Title result = titleService.getTitle(id);
 		return result;
 	}
@@ -52,6 +52,11 @@ public class TitlesController {
 	public Set<Title> getTitles(@QueryParam("year") int year, @QueryParam("type") String type,
 			@QueryParam("genre") String genre) {
 		return titleService.getTitles(year, type, Optional.ofNullable(genre));
+	}
+
+	@RequestMapping("/titles/cast/{id}")
+	public Set<Title> getTitlesByCast(@PathVariable("id") String castId) {
+		return titleService.getTitlesForCast(castId);
 	}
 
 }
