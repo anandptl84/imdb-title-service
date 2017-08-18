@@ -12,6 +12,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,8 +50,10 @@ public class TitlesController {
 	}
 
 	@RequestMapping("/titles")
-	public Set<Title> getTitles(@QueryParam("year") int year, @QueryParam("type") String type,
+	public Set<Title> getTitles(@QueryParam("year") Integer year, @QueryParam("type") String type,
 			@QueryParam("genre") String genre) {
+		Assert.notNull(year, "Must provie year query paramers");
+		Assert.notNull(type, "Must provide type query parameter");
 		return titleService.getTitles(year, type, Optional.ofNullable(genre));
 	}
 

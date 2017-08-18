@@ -11,32 +11,33 @@ public class Cast {
 
 	@Column(name="name_id")
 	@Id
-	private String name_id;
-	
+	private String nameId;
+
 	@Column(name="primary_name")
-	private String primary_name;
-	
+	private String primaryName;
+
 	@Column(name="birth_year")
 	private  Integer birthYear;
-	
+
 
 	@Column(name="death_year")
 	private Integer deathYear;
-	
-	public String getName_id() {
-		return name_id;
+
+
+	public String getNameId() {
+		return nameId;
 	}
 
-	public void setName_id(String name_id) {
-		this.name_id = name_id;
+	public void setNameId(String nameId) {
+		this.nameId = nameId;
 	}
 
-	public String getPrimary_name() {
-		return primary_name;
+	public String getPrimaryName() {
+		return primaryName;
 	}
 
-	public void setPrimary_name(String primary_name) {
-		this.primary_name = primary_name;
+	public void setPrimaryName(String primaryName) {
+		this.primaryName = primaryName;
 	}
 
 	public Integer getBirthYear() {
@@ -54,5 +55,4 @@ public class Cast {
 	public void setDeathYear(Integer deathYear) {
 		this.deathYear = deathYear;
 	}
-
 }

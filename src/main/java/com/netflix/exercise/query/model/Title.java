@@ -32,6 +32,13 @@ public class Title {
 	@Column(name = "genres")
 	private List<String> genres;
 
+
+	@Column(name = "start_year")
+	private Integer startYear;
+
+	@Column(name = "type")
+	private String type;
+
 	@OneToOne(fetch=FetchType.EAGER)
 	@PrimaryKeyJoinColumn
 	private TitleRating titleRating;
@@ -80,11 +87,6 @@ public class Title {
 		this.startYear = startYear;
 	}
 
-	@Column(name = "start_year")
-	private Integer startYear;
-
-	@Column(name = "type")
-	private String type;
 
 	public String getType() {
 		return type;
