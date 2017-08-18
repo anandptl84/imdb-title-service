@@ -14,7 +14,7 @@ In order to run and build the service, it will need maven and jdk 8 installed on
 
 Database details:
 
-server: test-mysql.cfqdpi5eyjla.us-east-1.rds.amazonaws.com
-port: 3306
-username: imdb_movies_op2
-password: imdb_movies_op2
+* server: test-mysql.cfqdpi5eyjla.us-east-1.rds.amazonaws.com
+* port: 3306
+* username: imdb_movies_op2
+* password: imdb_movies_op2
