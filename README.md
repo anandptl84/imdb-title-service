@@ -1,5 +1,14 @@
 # imdb-title-service
 
+Project Structure:
+  The project has two main components. 
+   1. BATCH JOB : to responsible to insert data into the mysql database. 
+        Everything with java package: com.netflix.exercise.batch will have classes related to insert job. 
+        
+   2. REST Service: to provide read api to retrieve data back from the database.
+        Every class other than batch framework is for the reader service. Reader uses hibernate to retrieve the data back. 
+   
+   
 Run Instructions:
 
 
