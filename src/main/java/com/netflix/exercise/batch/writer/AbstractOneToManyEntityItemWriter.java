@@ -9,6 +9,17 @@ import java.util.Optional;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+/**
+ *
+ * Absctact entity to provide templated code to create one to many relationship instructions for given type.
+ *
+ * E.g. object with parent id =1 , and child values as = 1,2,3 will create three inserts for
+ * (1,1), (1,2), (1,3)
+ *
+ * @author anand
+ *
+ * @param <T>
+ */
 public abstract class AbstractOneToManyEntityItemWriter<T> implements ItemWriter<T> {
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
