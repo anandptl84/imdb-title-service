@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.netflix.exercise.batch.TitleBasicItemWriter;
 import com.netflix.exercise.batch.mapper.TitleBasicRowFieldSetMapper;
 import com.netflix.exercise.batch.model.TitleBasicRow;
+import com.netflix.exercise.batch.writer.TitleBasicItemWriter;
 
 @Configuration
 public class TitleBasicRowConfig {
@@ -34,8 +34,8 @@ public class TitleBasicRowConfig {
 	@Bean(name = "titleBasicReader")
 	public ItemReader<TitleBasicRow> titleBasicReader() {
 		final FlatFileItemReader<TitleBasicRow> csvFileReader = new FlatFileItemReader<>();
-		csvFileReader.setResource(new ClassPathResource(titleBasicsPath));
-		csvFileReader.setLinesToSkip(1);
+		csvFileReader.setResource(new FileSystemResource(titleBasicsPath));
+		csvFileReader.setLinesToSkip(741466);
 		csvFileReader.setLineMapper(titleBasicRowMapper());
 		return csvFileReader;
 	}
@@ -56,30 +56,14 @@ public class TitleBasicRowConfig {
 				"isAdult", "startYear", "endYear", "runTimeMinutes", "genres" });
 		return titleBasicRowTokenizer;
 	}
-	//
-	// @SuppressWarnings("unchecked")
-	// @Bean
-	// public ItemWriter<TitleBasicRow> compositeTitleBasicRowWriter() {
-	// final CompositeItemWriter<TitleBasicRow> compositeWriter = new
-	// CompositeItemWriter<>();
-	// compositeWriter.setDelegates(Lists.newArrayList(basicItemWriter(),
-	// genreWriter()));
-	// return compositeWriter;
-	// }
 
 	@Bean
 	public TitleBasicItemWriter basicItemWriter() {
 		return new TitleBasicItemWriter(jdbcTemplate());
 	}
 
-	// @Bean
-	// public TitleGenreWriter genreWriter() {
-	// return new TitleGenreWriter(jdbcTemplate());
-	// }
-
 	@Bean
 	public JdbcTemplate jdbcTemplate() {
 		return new JdbcTemplate(dataSource);
 	}
-
 }

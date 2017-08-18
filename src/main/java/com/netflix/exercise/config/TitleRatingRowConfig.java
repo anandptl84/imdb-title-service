@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.netflix.exercise.batch.TitleRatingsWriter;
 import com.netflix.exercise.batch.mapper.TitleRatingRowFieldSetMapper;
 import com.netflix.exercise.batch.model.TitleRatingRow;
+import com.netflix.exercise.batch.writer.TitleRatingsWriter;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -38,7 +38,7 @@ public class TitleRatingRowConfig {
 	@Bean
 	public ItemReader<TitleRatingRow> titleRatingRowReader() {
 		final FlatFileItemReader<TitleRatingRow> csvFileReader = new FlatFileItemReader<>();
-		csvFileReader.setResource(new ClassPathResource(titleRatingsPath));
+		csvFileReader.setResource(new FileSystemResource(titleRatingsPath));
 		csvFileReader.setLinesToSkip(1);
 		csvFileReader.setLineMapper(titleRatingRowMapper());
 		return csvFileReader;
@@ -78,5 +78,4 @@ public class TitleRatingRowConfig {
 	public JdbcTemplate jdbcTemplate() {
 		return new JdbcTemplate(dataSource);
 	}
-
 }

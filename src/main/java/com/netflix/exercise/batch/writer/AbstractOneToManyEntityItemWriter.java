@@ -1,4 +1,4 @@
-package com.netflix.exercise.batch;
+package com.netflix.exercise.batch.writer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public abstract class AbstractOneToManyEntityItemWriter<T> implements ItemWriter<T> {
@@ -18,9 +16,9 @@ public abstract class AbstractOneToManyEntityItemWriter<T> implements ItemWriter
 	private final String associationKey;
 	private final String sql;
 
-	protected AbstractOneToManyEntityItemWriter(@Autowired JdbcTemplate jdbcTemplate, String entityKey,
+	protected AbstractOneToManyEntityItemWriter(NamedParameterJdbcTemplate jdbcTemplate, String entityKey,
 			String associationKey, String sql) {
-		this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+		this.jdbcTemplate = jdbcTemplate;
 		this.entityKey = entityKey;
 		this.associationKey = associationKey;
 		this.sql = sql;
@@ -29,19 +27,20 @@ public abstract class AbstractOneToManyEntityItemWriter<T> implements ItemWriter
 	@SuppressWarnings("unchecked")
 	@Override
 	public void write(List<? extends T> items) throws Exception {
-		List<Map<String, String>> params = new ArrayList<>();
-		for (T item : items) {
-			Optional<String> associationValues = getAssociationValues(item);
+		final List<Map<String, String>> params = new ArrayList<>();
+		for (final T item : items) {
+			final Optional<String> associationValues = getAssociationValues(item);
 			if (associationValues.isPresent()) {
-				for (String genre : associationValues.get().split(",")) {
-					Map<String, String> param_map = new HashMap<>();
+				for (final String genre : associationValues.get().split(",")) {
+					final Map<String, String> param_map = new HashMap<>();
 					param_map.put(entityKey, getEntityValue(item));
 					param_map.put(associationKey, genre);
 					params.add(param_map);
 				}
+				this.jdbcTemplate.batchUpdate(sql, params.toArray(new HashMap[params.size()]));
 			}
 		}
-		this.jdbcTemplate.batchUpdate(sql, params.toArray(new HashMap[params.size()]));
+
 	}
 
 	protected abstract Optional<String> getAssociationValues(T t);

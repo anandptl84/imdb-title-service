@@ -1,5 +1,6 @@
 package com.netflix.exercise.batch.mapper;
-import static com.netflix.exercise.batch.mapper.FileConstants.getNullableValue;
+import static com.netflix.exercise.batch.FileReaderUtils.getNullableValue;
+
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
 import org.springframework.stereotype.Component;

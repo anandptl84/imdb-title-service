@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.hibernate.FetchMode;
+import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -22,6 +23,7 @@ import com.netflix.exercise.query.model.Title;
 @Transactional
 public class TitleDaoImpl implements TitleDao {
 
+	private static final String TITLES_BY_CAST = " select t, r from Title t left join t.titleRating r join fetch t.primaryCast p where p.name_id = :castId";
 	@Autowired
 	private SessionFactory sessionFactory;
 
@@ -42,6 +44,7 @@ public class TitleDaoImpl implements TitleDao {
 				.add(Restrictions.eq("startYear", year))
 				.add(Restrictions.eq("type", type))
 				.setFetchMode("primaryCast", FetchMode.JOIN)
+				.setFetchMode("titleRating", FetchMode.JOIN)
 				.list();
 		return new HashSet<>(result);
 	}
@@ -50,8 +53,8 @@ public class TitleDaoImpl implements TitleDao {
 	@Override
 	public Set<Title> getTitlesForCast(String castId) {
 		final Session session = sessionFactory.getCurrentSession();
-		final Query query = session
-				.createQuery(" select t,p from Title t join fetch t.primaryCast p where p.name_id = :castId");
+		session.setFlushMode(FlushMode.MANUAL);
+		final Query query = session.createQuery(TITLES_BY_CAST);
 		query.setParameter("castId", castId);
 		return new HashSet<>(query.list());
 	}

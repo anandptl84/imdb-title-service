@@ -14,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import com.netflix.exercise.batch.TitlePrincipalCastWriter;
 import com.netflix.exercise.batch.mapper.TitlePrincipalCastRowFieldSetMapper;
 import com.netflix.exercise.batch.model.TitlePrincipalCastRow;
+import com.netflix.exercise.batch.writer.TitlePrincipalCastWriter;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -38,7 +39,7 @@ public class TitlePrincipalCastRowConfig {
 	@Bean
 	public ItemReader<TitlePrincipalCastRow> titlePrincipleCastRowReader() {
 		final FlatFileItemReader<TitlePrincipalCastRow> csvFileReader = new FlatFileItemReader<>();
-		csvFileReader.setResource(new ClassPathResource(titlePrincipalCastPath));
+		csvFileReader.setResource(new FileSystemResource(titlePrincipalCastPath));
 		csvFileReader.setLinesToSkip(1);
 		csvFileReader.setLineMapper(titlePrincipleCastMapper());
 		return csvFileReader;
@@ -71,7 +72,7 @@ public class TitlePrincipalCastRowConfig {
 
 	@Bean
 	public ItemWriter<TitlePrincipalCastRow> titlePrincipalCastRowWriter() {
-		return new TitlePrincipalCastWriter(jdbcTemplate());
+		return new TitlePrincipalCastWriter(namedJdbcTemplate());
 
 	}
 
@@ -80,4 +81,9 @@ public class TitlePrincipalCastRowConfig {
 		return new JdbcTemplate(dataSource);
 	}
 
+
+	@Bean
+	public NamedParameterJdbcTemplate namedJdbcTemplate() {
+		return new NamedParameterJdbcTemplate(jdbcTemplate());
+	}
 }

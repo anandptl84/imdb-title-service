@@ -6,14 +6,18 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.FlowBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean;
 
 import com.netflix.exercise.batch.model.NameBasicRow;
@@ -23,7 +27,7 @@ import com.netflix.exercise.batch.model.TitleRatingRow;
 
 @Configuration
 @Import({ TitleBasicRowConfig.class, TitlePrincipalCastRowConfig.class, TitleRatingRowConfig.class,
-		NameBasicConfig.class })
+	NameBasicConfig.class })
 public class BatchConfig {
 
 	@Autowired
@@ -31,6 +35,9 @@ public class BatchConfig {
 
 	@Autowired
 	public StepBuilderFactory stepBuilderFactory;
+
+	@Value("${batch.size}")
+	private int batchSize;
 
 	@Autowired
 	@Qualifier("titleBasicReader")
@@ -40,14 +47,6 @@ public class BatchConfig {
 	@Qualifier("basicItemWriter")
 	public ItemWriter<TitleBasicRow> compositeTitleBasicRowWriter;
 
-	// @Autowired
-	// @Qualifier("titleCrewReader")
-	// public ItemReader<TitleCrewRow> titleCrewReader;
-	//
-	// @Autowired
-	// @Qualifier("compositeTitleCrewRowWriter")
-	// public ItemWriter<TitleCrewRow> compositeTitleCrewRowWriter;
-
 	@Autowired
 	@Qualifier("titlePrincipleCastRowReader")
 	public ItemReader<TitlePrincipalCastRow> titlePrincipalCastRowReader;
@@ -55,14 +54,7 @@ public class BatchConfig {
 	@Autowired
 	@Qualifier("compositeTitlePrincipalCastRowWriter")
 	public ItemWriter<TitlePrincipalCastRow> compositeTitlePrincipalCastRowWriter;
-	//
-	// @Autowired
-	// @Qualifier("titleEpisodeReader")
-	// public ItemReader<TitleEpisodeRow> titleEpisodeReader;
-	//
-	// @Autowired
-	// @Qualifier("compositeTitleEpisodeRowWriter")
-	// public ItemWriter<TitleEpisodeRow> compositeTitleEpisodeRowWriter;
+
 
 	@Autowired
 	@Qualifier("titleRatingRowReader")
@@ -82,39 +74,33 @@ public class BatchConfig {
 
 	@Bean
 	public Job titleBasicInsertJob() {
-		return jobBuilderFactory.get("titleBasicInsertJob").incrementer(new RunIdIncrementer())
-				// .start(titleBasicInsert()).next(titlePrincipleCastInsert()).next(titleRatingInsert())
-				.start(nameBasicInsert()).build();
+		final Flow nameBasicFlow = new FlowBuilder<Flow>("nameBasicFlow").from(nameBasicInsert()).end();
+		final Flow titleBasicFlow = new FlowBuilder<Flow>("titleBasicFlow").from(titleBasicInsert()).end();
+		final Flow principalCastFlow = new FlowBuilder<Flow>("principalCastFlow").from(titlePrincipleCastInsert()).end();
+		final Flow ratingFlow = new FlowBuilder<Flow>("titleRatingFlow").from(titleRatingInsert()).end();
+
+		return jobBuilderFactory.get("titleBasicInsertJob")
+				.incrementer(new RunIdIncrementer())
+				.start(titleBasicFlow)
+				.split(asyncTaskExecutor()).add(nameBasicFlow)
+				.split(asyncTaskExecutor()).add(principalCastFlow)
+				.split(asyncTaskExecutor()).add(ratingFlow)
+				.end().build();
+
 	}
 
 	@Bean
 	public Step titleBasicInsert() {
-		return stepBuilderFactory.get("titleBasicInsert").<TitleBasicRow, TitleBasicRow>chunk(1)
+		return stepBuilderFactory.get("titleBasicInsert").<TitleBasicRow, TitleBasicRow>chunk(batchSize)
 				.reader(titleBasicReader).writer(compositeTitleBasicRowWriter).faultTolerant().skip(Exception.class)
 				.skipLimit(Integer.MAX_VALUE).build();
 
 	}
-	//
-	// @Bean
-	// public Step titleCrewInsert() {
-	// return stepBuilderFactory.get("titleCrewInsert").<TitleCrewRow,
-	// TitleCrewRow>chunk(1).reader(titleCrewReader)
-	// .writer(compositeTitleCrewRowWriter).faultTolerant().skip(Exception.class).skipLimit(Integer.MAX_VALUE)
-	// .build();
-	// }
-	//
-	// @Bean
-	// public Step titleEpisodeInsert() {
-	// return stepBuilderFactory.get("titleEpisodeInsert").<TitleEpisodeRow,
-	// TitleEpisodeRow>chunk(1)
-	// .reader(titleEpisodeReader).writer(compositeTitleEpisodeRowWriter).faultTolerant().skip(Exception.class)
-	// .skipLimit(Integer.MAX_VALUE).build();
-	// }
 
 	@Bean
 	public Step titlePrincipleCastInsert() {
 
-		return stepBuilderFactory.get("titlePrincipleCastInsert").<TitlePrincipalCastRow, TitlePrincipalCastRow>chunk(1)
+		return stepBuilderFactory.get("titlePrincipleCastInsert").<TitlePrincipalCastRow, TitlePrincipalCastRow>chunk(batchSize)
 				.reader(titlePrincipalCastRowReader).writer(compositeTitlePrincipalCastRowWriter).faultTolerant()
 				.skip(Exception.class).skipLimit(Integer.MAX_VALUE).build();
 	}
@@ -122,7 +108,7 @@ public class BatchConfig {
 	@Bean
 	public Step titleRatingInsert() {
 
-		return stepBuilderFactory.get("titleRatingInsert").<TitleRatingRow, TitleRatingRow>chunk(1)
+		return stepBuilderFactory.get("titleRatingInsert").<TitleRatingRow, TitleRatingRow>chunk(batchSize)
 				.reader(titleRatingRowReader).writer(compositeTitleRatingWriter).faultTolerant().skip(Exception.class)
 				.skipLimit(Integer.MAX_VALUE).build();
 	}
@@ -130,9 +116,14 @@ public class BatchConfig {
 	@Bean
 	public Step nameBasicInsert() {
 
-		return stepBuilderFactory.get("nameBasicInsert").<NameBasicRow, NameBasicRow>chunk(10)
+		return stepBuilderFactory.get("nameBasicInsert").<NameBasicRow, NameBasicRow>chunk(batchSize)
 				.reader(nameBasicRowReader).writer(compositeNameBasicWriter).faultTolerant().skip(Exception.class)
 				.skipLimit(Integer.MAX_VALUE).build();
+	}
+
+	@Bean
+	public SimpleAsyncTaskExecutor asyncTaskExecutor() {
+		return new SimpleAsyncTaskExecutor();
 	}
 
 	@Bean

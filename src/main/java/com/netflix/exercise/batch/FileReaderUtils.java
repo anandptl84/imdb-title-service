@@ -1,8 +1,8 @@
-package com.netflix.exercise.batch.mapper;
+package com.netflix.exercise.batch;
 
 import java.util.function.Function;
 
-public class FileConstants {
+public class FileReaderUtils {
 
 	public static String NULL_VALUE = "\\N";
 	

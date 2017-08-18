@@ -1,6 +1,6 @@
 package com.netflix.exercise.batch.mapper;
 
-import static com.netflix.exercise.batch.mapper.FileConstants.getNullableValue;
+import static com.netflix.exercise.batch.FileReaderUtils.getNullableValue;
 
 import java.util.function.Function;
 

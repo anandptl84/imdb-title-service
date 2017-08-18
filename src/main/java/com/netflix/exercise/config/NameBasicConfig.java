@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import com.netflix.exercise.batch.NameBasicItemWriter;
-import com.netflix.exercise.batch.NameKnownTitleWriter;
 import com.netflix.exercise.batch.mapper.NameBasicRowFieldSetMapper;
 import com.netflix.exercise.batch.model.NameBasicRow;
+import com.netflix.exercise.batch.writer.NameBasicItemWriter;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -39,7 +39,7 @@ public class NameBasicConfig {
 	@Bean
 	public ItemReader<NameBasicRow> nameBasicRowReader() {
 		final FlatFileItemReader<NameBasicRow> csvFileReader = new FlatFileItemReader<>();
-		csvFileReader.setResource(new ClassPathResource(nameBasicsPath));
+		csvFileReader.setResource(new FileSystemResource(nameBasicsPath));
 		csvFileReader.setLinesToSkip(1);
 		csvFileReader.setLineMapper(nameBasicRowMapper());
 		return csvFileReader;
@@ -67,7 +67,7 @@ public class NameBasicConfig {
 	@Bean
 	public ItemWriter<NameBasicRow> compositeNameBasicWriter() {
 		final CompositeItemWriter<NameBasicRow> compositeWriter = new CompositeItemWriter<>();
-		compositeWriter.setDelegates(Lists.newArrayList(nameBasicRowWriter(), nameKnownTitleWriter()));
+		compositeWriter.setDelegates(Lists.newArrayList(nameBasicRowWriter()));
 		return compositeWriter;
 	}
 
@@ -77,12 +77,12 @@ public class NameBasicConfig {
 	}
 
 	@Bean
-	public ItemWriter<NameBasicRow> nameKnownTitleWriter() {
-		return new NameKnownTitleWriter(jdbcTemplate());
+	public JdbcTemplate jdbcTemplate() {
+		return new JdbcTemplate(dataSource);
 	}
 
 	@Bean
-	public JdbcTemplate jdbcTemplate() {
-		return new JdbcTemplate(dataSource);
+	public NamedParameterJdbcTemplate namedJdbcTemplate() {
+		return new NamedParameterJdbcTemplate(jdbcTemplate());
 	}
 }

@@ -1,4 +1,4 @@
-package com.netflix.exercise.batch;
+package com.netflix.exercise.batch.writer;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

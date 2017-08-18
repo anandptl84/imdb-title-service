@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
@@ -31,11 +32,11 @@ public class Title {
 	@Column(name = "genres")
 	private List<String> genres;
 
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "id")
+	@OneToOne(fetch=FetchType.EAGER)
+	@PrimaryKeyJoinColumn
 	private TitleRating titleRating;
 
-	@OneToMany(fetch = FetchType.EAGER)
+	@OneToMany
 	@JoinTable(name = "title_principal_cast", joinColumns = @JoinColumn(name = "title_id"), inverseJoinColumns = @JoinColumn(name = "cast_id"))
 	private List<Cast> primaryCast;
 
@@ -71,16 +72,16 @@ public class Title {
 		this.titleRating = titleRating;
 	}
 
-	public int getStartYear() {
+	public Integer getStartYear() {
 		return startYear;
 	}
 
-	public void setStartYear(int startYear) {
+	public void setStartYear(Integer startYear) {
 		this.startYear = startYear;
 	}
 
 	@Column(name = "start_year")
-	private int startYear;
+	private Integer startYear;
 
 	@Column(name = "type")
 	private String type;
