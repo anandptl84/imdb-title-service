@@ -7,6 +7,12 @@ Project Structure:
         
    2. REST Service: to provide read api to retrieve data back from the database.
         Every class other than batch framework is for the reader service. Reader uses hibernate & spring boot to retrieve the data back over http service.
+        
+        API Provided:
+        * http://localhost:8080/titles?year=2017&type=movie  (All movies by year and type)
+        * http://localhost:8080/titles?year=2017&type=movie&genre=Comedy  (Optional genre to filter further on type and movie)
+        * http://localhost:8080/titles/id/tt0020172   (All movies for given title id)
+        * http://localhost:8080/titles/cast/nm0000300  (All titles where given name_id was primaryCast on the title)
    
    
 Run Instructions:
