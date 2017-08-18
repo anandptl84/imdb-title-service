@@ -3,21 +3,18 @@
 Project Structure:
   The project has two main components. 
    1. BATCH JOB : to responsible to insert data into the mysql database. 
-        Everything with java package: com.netflix.exercise.batch will have classes related to insert job. 
+        Everything with java package: com.netflix.exercise.batch will have classes related to insert job.  For Load we could have simply use the mysql load from file using commands like "LOAD DATA LOCAL INFILE '/Users/anand/exercise/title.basics.tsv' into table imdb_movies.title_basic;" however, because some fileds are comma separated values which would be hard to join otherwise, I decided to write my own ETL (Extract, Transform, Load) component. With this, I can map titles.principas.tsv data to  title_id, cast_id relation ship. This will allow me to answer queries like give all titles for cast id = ? 
         
    2. REST Service: to provide read api to retrieve data back from the database.
-        Every class other than batch framework is for the reader service. Reader uses hibernate to retrieve the data back. 
+        Every class other than batch framework is for the reader service. Reader uses hibernate & spring boot to retrieve the data back over http service.
    
    
 Run Instructions:
+In order to run and build the service, it will need maven and jdk 8 installed on the box. the project war file can be build with mvn install command.
 
+Database details:
 
-Code Structure:
-I could think of two possible way to load the data into the system. 
-  1. MySQL Load File command mapping each file as a separate table (Quick and Easiest way to load data)
-     However, due to some parameters being stored as the comma separated values, it would be hard to answer queries like, 
-     give me all titles for a principal cast with name = ?
-  2. That is why i chose to write a basic ETL (Extract, Transform, Load ) process to insert the data into my sql table,
-  where i store the comma separated values as normalized table (e.g. title_id, cast_id) for titles.principals.tsv file. 
-  
-1. Data Model:
+server: test-mysql.cfqdpi5eyjla.us-east-1.rds.amazonaws.com
+port: 3306
+username: imdb_movies_op2
+password: imdb_movies_op2
